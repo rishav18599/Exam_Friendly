@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>UGC NET · PYQ Predictor</title>
+<link rel="icon" type="image/png" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f7fb;--g1:#ffffff;--g2:#eef3f9;--g3:#dfe8f3;
+  --surface:rgba(222,233,247,.5);--line:rgba(110,130,160,.35);
+  --fg:#1a2440;--muted:#5a6a8a;
+  --shadow:0 6px 18px rgba(30,50,80,.12);
+  --glass-blur:blur(10px) saturate(140%);
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151c;--g1:#1b2430;--g2:#121821;--g3:#0b0f15;
+    --surface:rgba(255,255,255,.10);--line:rgba(255,255,255,.28);
+    --fg:#e8edf8;--muted:#8a9ab8;
+    --shadow:0 6px 18px rgba(0,0,0,.5);
+  }
+}
+html,body{min-height:100vh}
+body{
+  font-family:'Source Sans 3',system-ui,sans-serif;
+  color:var(--fg);
+  background:radial-gradient(90% 45% at 20% 0,var(--g1),transparent 70%),
+             linear-gradient(170deg,var(--g2),var(--g3)) fixed;
+  background-color:var(--bg);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));
+}
+
+/* Back link */
+.back{
+  position:fixed;top:max(16px,env(safe-area-inset-top));left:16px;
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:500;
+  color:var(--muted);text-decoration:none;
+  border:1px solid var(--line);border-radius:999px;padding:5px 12px;
+  background:var(--surface);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  transition:color .15s;
+}
+.back:hover{color:var(--fg)}
+
+/* Header */
+.hub-header{text-align:center;margin-bottom:40px}
+.hub-breadcrumb{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--line);border-radius:999px;padding:4px 14px;
+  margin-bottom:16px;
+  background:var(--surface);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+}
+.breadcrumb-sep{opacity:.45}
+.hub-title{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;
+  line-height:1.1;letter-spacing:-.02em;
+}
+.hub-sub{margin-top:8px;font-size:1rem;color:var(--muted)}
+
+/* Cards grid */
+.hub-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px;width:100%;max-width:900px;
+}
+
+/* Subject card */
+.subj-card{
+  position:relative;overflow:hidden;isolation:isolate;
+  border:1px solid var(--line);border-radius:20px;
+  background:var(--surface);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:var(--shadow);
+  padding:28px 24px 24px;
+  display:flex;flex-direction:column;gap:10px;
+  transition:transform .18s,box-shadow .18s;
+}
+.subj-card::before{
+  content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(45deg,transparent 0 56%,rgba(255,255,255,.85) 56% 100%);
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .subj-card::before{
+    background:linear-gradient(45deg,transparent 0 56%,rgba(255,255,255,.14) 56% 100%);
+  }
+}
+.subj-card:not(.disabled):hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 28px rgba(30,50,80,.18);
+}
+.subj-icon{
+  font-size:2.2rem;line-height:1;
+  width:52px;height:52px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(58,123,224,.18),rgba(58,123,224,.06));
+  border:1px solid rgba(58,123,224,.25);margin-bottom:4px;
+}
+.subj-card.disabled .subj-icon{
+  background:linear-gradient(135deg,rgba(140,150,170,.12),rgba(140,150,170,.04));
+  border-color:rgba(140,150,170,.2);
+}
+.subj-name{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:1.35rem;font-weight:700;line-height:1.2;
+}
+.subj-desc{font-size:.88rem;color:var(--muted);line-height:1.5;flex:1}
+.badge{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;font-size:.68rem;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  border-radius:999px;padding:3px 10px;
+  background:rgba(140,150,170,.15);color:var(--muted);
+  border:1px solid var(--line);width:fit-content;
+}
+.enter-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:6px;padding:11px 20px;
+  font-family:inherit;font-size:.95rem;font-weight:600;color:#fff;
+  background:linear-gradient(180deg,#2f6fd6 0%,#1243a3 55%,#0c3380 100%);
+  border:1px solid rgba(255,255,255,.6);border-radius:12px;
+  box-shadow:0 4px 12px rgba(21,80,181,.3);
+  cursor:pointer;text-decoration:none;
+  position:relative;overflow:hidden;transition:opacity .15s;
+}
+.enter-btn::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(45deg,transparent 0 50%,rgba(255,255,255,.35) 50% 100%);
+}
+.enter-btn:hover{opacity:.9}
+.enter-btn .arr{font-size:1.1em;line-height:1}
+.subj-card.disabled{opacity:.55;pointer-events:none}
+.subj-card.disabled .enter-btn{display:none}
+
+.hub-footer{
+  margin-top:40px;font-size:.78rem;color:var(--muted);
+  font-family:'IBM Plex Mono',monospace;text-align:center;opacity:.7;
+}
+</style>
+
+<a class="back" href="../">← Exams</a>
+
+<body>
+  <div class="hub-header">
+    <div class="hub-breadcrumb">
+      <span>Exams</span><span class="breadcrumb-sep">›</span><span>UGC NET</span>
+    </div>
+    <h1 class="hub-title">UGC NET</h1>
+    <p class="hub-sub">Choose your Paper II subject</p>
+  </div>
+
+  <div class="hub-grid">
+    <div class="subj-card">
+      <div class="subj-icon">🏺</div>
+      <div class="subj-name">Anthropology</div>
+      <p class="subj-desc">PYQ predictor, topic-wise practice, weakest-topic tracker and study order recommendations.</p>
+      <a class="enter-btn" href="../app/">Open <span class="arr">→</span></a>
+    </div>
+
+    <div class="subj-card">
+      <div class="subj-icon">📋</div>
+      <div class="subj-name">Mock Test</div>
+      <p class="subj-desc">Full 100-question paper simulation with 2-hour countdown timer, question palette and detailed results.</p>
+      <a class="enter-btn" href="../mock-test/">Start <span class="arr">→</span></a>
+    </div>
+
+    <div class="subj-card disabled">
+      <div class="subj-icon">🧠</div>
+      <div class="subj-name">Psychology</div>
+      <p class="subj-desc">PYQ predictor and practice for UGC NET Psychology Paper II.</p>
+      <div class="badge">Coming soon</div>
+    </div>
+  </div>
+
+  <div class="hub-footer">Local · LAN only · Data stays on this device</div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>COGJET · PYQ Predictor</title>
+<link rel="icon" type="image/png" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f7fb;--g1:#ffffff;--g2:#eef3f9;--g3:#dfe8f3;
+  --surface:rgba(222,233,247,.5);--line:rgba(110,130,160,.35);
+  --fg:#1a2440;--muted:#5a6a8a;--accent:#2a5fd4;
+  --good:#1a8a45;--good-soft:rgba(26,138,69,.12);
+  --shadow:0 6px 18px rgba(30,50,80,.12);
+  --glass-blur:blur(10px) saturate(140%);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10151c;--g1:#1b2430;--g2:#121821;--g3:#0b0f15;
+  --surface:rgba(255,255,255,.10);--line:rgba(255,255,255,.28);
+  --fg:#e8edf8;--muted:#8a9ab8;--shadow:0 6px 18px rgba(0,0,0,.5);
+}}
+html,body{min-height:100vh}
+body{font-family:'Source Sans 3',system-ui,sans-serif;color:var(--fg);
+  background:radial-gradient(90% 45% at 20% 0,var(--g1),transparent 70%),linear-gradient(170deg,var(--g2),var(--g3)) fixed;
+  background-color:var(--bg);padding:max(16px,env(safe-area-inset-top)) 16px 40px;}
+.back{position:fixed;top:max(16px,env(safe-area-inset-top));left:16px;
+  display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;
+  font-size:.75rem;font-weight:500;color:var(--muted);text-decoration:none;
+  border:1px solid var(--line);border-radius:999px;padding:5px 12px;
+  background:var(--surface);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);transition:color .15s;}
+.back:hover{color:var(--fg)}
+.wrap{max-width:800px;margin:60px auto 0;display:flex;flex-direction:column;gap:28px;}
+.page-header{text-align:center;padding:8px 0 4px;}
+.badge-row{display:flex;justify-content:center;margin-bottom:12px;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--line);border-radius:999px;padding:4px 14px;background:var(--surface);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);}
+h1{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(2rem,6vw,3rem);font-weight:800;line-height:1.1;letter-spacing:-.02em;}
+.sub{margin-top:8px;color:var(--muted);font-size:1rem;}
+.card{border:1px solid var(--line);border-radius:20px;background:var(--surface);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:var(--shadow);padding:24px;position:relative;overflow:hidden;isolation:isolate;}
+.card::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(45deg,transparent 0 56%,rgba(255,255,255,.85) 56% 100%);}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .card::before{opacity:.08}}
+.card-title{font-family:'Bricolage Grotesque',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;}
+.card-title .icon{font-size:1.3rem;}
+/* Syllabus */
+.syl-part{margin-bottom:18px;}
+.syl-part:last-child{margin-bottom:0;}
+.part-label{font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:10px;padding:3px 10px;
+  background:rgba(42,95,212,.1);border-radius:6px;display:inline-block;}
+.topic-list{display:flex;flex-direction:column;gap:6px;}
+.topic{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-radius:10px;
+  border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:.93rem;}
+.topic-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.topic-name{font-weight:600;}
+.topic-desc{color:var(--muted);font-size:.85rem;margin-top:2px;}
+/* Materials */
+.mat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.mat-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;
+  border:1px solid var(--line);background:rgba(255,255,255,.04);text-decoration:none;
+  color:var(--fg);transition:transform .15s,box-shadow .15s;}
+.mat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(30,50,80,.18);}
+.mat-icon{font-size:1.8rem;flex-shrink:0;}
+.mat-name{font-weight:600;font-size:.93rem;}
+.mat-type{font-size:.8rem;color:var(--muted);margin-top:2px;}
+/* Sections */
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px;}
+/* Info banner */
+.info-banner{background:rgba(42,95,212,.08);border:1px solid rgba(42,95,212,.2);
+  border-radius:12px;padding:14px 16px;font-size:.9rem;color:var(--fg);display:flex;gap:10px;align-items:flex-start;}
+.info-banner .ii{font-size:1.1rem;flex-shrink:0;}
+/* Stats grid */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:4px;}
+.stat-box{text-align:center;padding:14px 8px;border-radius:12px;border:1px solid var(--line);
+  background:rgba(255,255,255,.04);}
+.stat-num{font-family:'Bricolage Grotesque',sans-serif;font-size:1.6rem;font-weight:800;color:var(--accent);}
+.stat-lbl{font-size:.78rem;color:var(--muted);margin-top:2px;}
+</style>
+
+<a class="back" href="../">← All Exams</a>
+
+<div class="wrap">
+  <div class="page-header">
+    <div class="badge-row">
+      <div class="badge">🧩 &nbsp;Cognitive Science</div>
+    </div>
+    <h1>COGJET 2026</h1>
+    <p class="sub">Cognitive Science Joint Entrance Test — IIT Gandhinagar &amp; partner institutes</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num">3</div><div class="stat-lbl">Sections</div></div>
+    <div class="stat-box"><div class="stat-num">~40</div><div class="stat-lbl">Questions</div></div>
+    <div class="stat-box"><div class="stat-num">2 hrs</div><div class="stat-lbl">Duration</div></div>
+  </div>
+
+  <!-- Info -->
+  <div class="info-banner">
+    <span class="ii">ℹ️</span>
+    <span>COGJET tests aptitude (Part I — CAT level) and subject knowledge in Maths &amp; Computation, Cognitive Psychology, and Neuroscience (Part II). Practice questions and mock tests coming soon.</span>
+  </div>
+
+  <!-- Syllabus -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span> Syllabus</div>
+
+    <div class="syl-part">
+      <div class="part-label">Part I — Aptitude</div>
+      <div class="topic-list">
+        <div class="topic"><span class="topic-icon">🔢</span><div><div class="topic-name">Quantitative Aptitude</div><div class="topic-desc">CAT-level — arithmetic, algebra, data interpretation</div></div></div>
+        <div class="topic"><span class="topic-icon">📖</span><div><div class="topic-name">Verbal Ability</div><div class="topic-desc">Reading comprehension, vocabulary, grammar</div></div></div>
+        <div class="topic"><span class="topic-icon">🧩</span><div><div class="topic-name">Logical Reasoning</div><div class="topic-desc">Puzzles, sequences, analytical problems</div></div></div>
+      </div>
+    </div>
+
+    <div class="syl-part">
+      <div class="part-label">Part II-A — Maths &amp; Computation</div>
+      <div class="topic-list">
+        <div class="topic"><span class="topic-icon">∑</span><div><div class="topic-name">Discrete Mathematics</div><div class="topic-desc">Sets, relations, combinatorics, matrices, geometry</div></div></div>
+        <div class="topic"><span class="topic-icon">∫</span><div><div class="topic-name">Calculus</div><div class="topic-desc">Limits, differentiation, integration, extrema</div></div></div>
+        <div class="topic"><span class="topic-icon">📊</span><div><div class="topic-name">Probability &amp; Statistics</div><div class="topic-desc">Bayes theorem, distributions, expectation, variance, percentiles</div></div></div>
+        <div class="topic"><span class="topic-icon">💻</span><div><div class="topic-name">Computation &amp; Algorithms</div><div class="topic-desc">Boolean algebra, data structures, sorting, searching, pseudocode</div></div></div>
+      </div>
+    </div>
+
+    <div class="syl-part">
+      <div class="part-label">Part II-B — Cognitive Psychology</div>
+      <div class="topic-list">
+        <div class="topic"><span class="topic-icon">👁️</span><div><div class="topic-name">Psychophysics</div><div class="topic-desc">Absolute thresholds, Weber's Law, Fechner's Law, reaction time</div></div></div>
+        <div class="topic"><span class="topic-icon">🧠</span><div><div class="topic-name">Learning &amp; Memory</div><div class="topic-desc">Pavlovian conditioning, Hebbian learning, modal model, working memory</div></div></div>
+        <div class="topic"><span class="topic-icon">🌈</span><div><div class="topic-name">Visual Perception</div><div class="topic-desc">Colour, depth &amp; motion perception, perceptual organisation</div></div></div>
+        <div class="topic"><span class="topic-icon">📉</span><div><div class="topic-name">Research Methods</div><div class="topic-desc">t-test, chi-square, ANOVA, p-value, effect size, normal distribution</div></div></div>
+      </div>
+    </div>
+
+    <div class="syl-part">
+      <div class="part-label">Part II-C — Neuroscience</div>
+      <div class="topic-list">
+        <div class="topic"><span class="topic-icon">🫀</span><div><div class="topic-name">Neuroanatomy</div><div class="topic-desc">Cortical &amp; subcortical structures, brain divisions, PNS, planes of section</div></div></div>
+        <div class="topic"><span class="topic-icon">⚡</span><div><div class="topic-name">Neurophysiology</div><div class="topic-desc">Neuron structure, glial cells, action potentials, synaptic transmission</div></div></div>
+        <div class="topic"><span class="topic-icon">🔄</span><div><div class="topic-name">Brain Function</div><div class="topic-desc">Regional functions, reflex arc, sensory receptors</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Study Materials -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📚</span> Study Materials</div>
+    <div class="mat-grid">
+      <a class="mat-card" href="./study-material.pdf" target="_blank">
+        <span class="mat-icon">📄</span>
+        <div><div class="mat-name">COGJET Study Material</div><div class="mat-type">PDF · Core concepts</div></div>
+      </a>
+      <a class="mat-card" href="./sample-questions.pdf" target="_blank">
+        <span class="mat-icon">📝</span>
+        <div><div class="mat-name">Sample Questions</div><div class="mat-type">PDF · Official sample paper</div></div>
+      </a>
+      <a class="mat-card" href="./syllabus.jpeg" target="_blank">
+        <span class="mat-icon">🗂️</span>
+        <div><div class="mat-name">Syllabus Overview</div><div class="mat-type">Image · Quick reference</div></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Coming Soon -->
+  <div class="card" style="text-align:center;padding:32px 24px;">
+    <div style="font-size:2.5rem;margin-bottom:12px;">🚀</div>
+    <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:8px;">Practice Questions &amp; Mock Test</div>
+    <div style="color:var(--muted);font-size:.9rem;">Interactive practice with scoring is being built. Check back soon.</div>
+  </div>
+</div>

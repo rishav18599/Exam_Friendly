@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PYQ Predictor</title>
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f7fb;--g1:#ffffff;--g2:#eef3f9;--g3:#dfe8f3;
+  --surface:rgba(222,233,247,.5);--line:rgba(110,130,160,.35);
+  --fg:#1a2440;--muted:#5a6a8a;
+  --shadow:0 6px 18px rgba(30,50,80,.12);
+  --glass-blur:blur(10px) saturate(140%);
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151c;--g1:#1b2430;--g2:#121821;--g3:#0b0f15;
+    --surface:rgba(255,255,255,.10);--line:rgba(255,255,255,.28);
+    --fg:#e8edf8;--muted:#8a9ab8;
+    --shadow:0 6px 18px rgba(0,0,0,.5);
+  }
+}
+html,body{min-height:100vh}
+body{
+  font-family:'Source Sans 3',system-ui,sans-serif;
+  color:var(--fg);
+  background:radial-gradient(90% 45% at 20% 0,var(--g1),transparent 70%),
+             linear-gradient(170deg,var(--g2),var(--g3)) fixed;
+  background-color:var(--bg);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));
+}
+
+/* Header */
+.hub-header{text-align:center;margin-bottom:44px}
+.hub-eyebrow{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--line);border-radius:999px;padding:4px 14px;
+  margin-bottom:16px;
+  background:var(--surface);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+}
+.hub-title{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:clamp(2rem,6vw,3.4rem);font-weight:800;
+  line-height:1.1;letter-spacing:-.02em;
+}
+.hub-sub{margin-top:8px;font-size:1rem;color:var(--muted)}
+
+/* Cards grid */
+.hub-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:16px;width:100%;max-width:780px;
+}
+
+/* Exam card — IIT-logo-style glass panel */
+.exam-card{
+  position:relative;overflow:hidden;isolation:isolate;
+  border-radius:22px;
+  /* Chrome rim: bright top+left, dim bottom+right */
+  border-top:1.5px solid rgba(255,255,255,.85);
+  border-left:1.5px solid rgba(255,255,255,.60);
+  border-right:1px solid rgba(255,255,255,.12);
+  border-bottom:1px solid rgba(255,255,255,.10);
+  /* Glass base — neutral silver */
+  background:linear-gradient(148deg,rgba(255,255,255,.20) 0%,rgba(200,215,235,.08) 55%,rgba(80,100,140,.10) 100%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);
+  /* Outer depth + inset rim glow matching bright edges */
+  box-shadow:
+    0 18px 44px rgba(10,20,50,.28),
+    0 5px 14px rgba(10,20,50,.18),
+    inset 0 1.5px 0 rgba(255,255,255,.65),   /* top inner rim */
+    inset 1.5px 0 0 rgba(255,255,255,.40),   /* left inner rim */
+    inset 0 -1px 0 rgba(0,0,0,.12),           /* bottom inner shadow */
+    inset -1px 0 0 rgba(0,0,0,.08);           /* right inner shadow */
+  padding:24px 22px 20px;
+  display:flex;flex-direction:column;gap:8px;
+  text-decoration:none;color:inherit;
+  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s;
+}
+/* Upper-left bright zone: sharp diagonal demarcation */
+.exam-card::before{
+  content:'';position:absolute;inset:0;
+  z-index:-1;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(
+    135deg,
+    rgba(255,255,255,.62) 0%,
+    rgba(255,255,255,.50) 22%,
+    rgba(255,255,255,.28) 36%,  /* demarcation begins */
+    rgba(255,255,255,.04) 45%,  /* demarcation ends */
+    transparent 52%             /* dark lower-right zone */
+  );
+}
+/* Secondary bounce glow at opposite corner (lower-right) */
+.exam-card::after{
+  content:'';position:absolute;inset:0;
+  z-index:-1;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(
+    ellipse at 96% 94%,
+    rgba(255,255,255,.28) 0%,
+    rgba(255,255,255,.12) 28%,
+    transparent 58%
+  );
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .exam-card{
+    border-top-color:rgba(255,255,255,.65);
+    border-left-color:rgba(255,255,255,.40);
+    border-right-color:rgba(255,255,255,.08);
+    border-bottom-color:rgba(255,255,255,.06);
+    background:linear-gradient(148deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.04) 55%,rgba(0,0,0,.14) 100%);
+    box-shadow:
+      0 18px 44px rgba(0,0,0,.60),
+      0 5px 14px rgba(0,0,0,.42),
+      inset 0 1.5px 0 rgba(255,255,255,.48),
+      inset 1.5px 0 0 rgba(255,255,255,.28),
+      inset 0 -1px 0 rgba(0,0,0,.25),
+      inset -1px 0 0 rgba(0,0,0,.18);
+  }
+  :root:not([data-theme="light"]) .exam-card::before{
+    background:linear-gradient(
+      135deg,
+      rgba(255,255,255,.42) 0%,
+      rgba(255,255,255,.32) 22%,
+      rgba(255,255,255,.16) 36%,
+      rgba(255,255,255,.02) 45%,
+      transparent 52%
+    );
+  }
+  :root:not([data-theme="light"]) .exam-card::after{
+    background:radial-gradient(ellipse at 96% 94%,rgba(255,255,255,.22) 0%,rgba(255,255,255,.08) 28%,transparent 58%);
+  }
+}
+.exam-card:not(.disabled):hover{
+  transform:translateY(-4px) scale(1.015);
+  box-shadow:
+    0 26px 56px rgba(10,20,50,.32),
+    0 10px 22px rgba(10,20,50,.22),
+    inset 0 1.5px 0 rgba(255,255,255,.75),
+    inset 1.5px 0 0 rgba(255,255,255,.50),
+    inset 0 -1px 0 rgba(0,0,0,.14),
+    inset -1px 0 0 rgba(0,0,0,.10);
+}
+
+.exam-icon{
+  font-size:1.9rem;line-height:1;
+  width:48px;height:48px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:2px;
+}
+.exam-card:nth-child(1) .exam-icon{background:linear-gradient(135deg,rgba(58,123,224,.2),rgba(58,123,224,.06));border:1px solid rgba(58,123,224,.28)}
+.exam-card:nth-child(2) .exam-icon{background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.06));border:1px solid rgba(16,185,129,.28)}
+.exam-card:nth-child(3) .exam-icon{background:linear-gradient(135deg,rgba(245,130,32,.2),rgba(245,130,32,.06));border:1px solid rgba(245,130,32,.28)}
+.exam-card:nth-child(4) .exam-icon{background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(168,85,247,.06));border:1px solid rgba(168,85,247,.28)}
+.exam-card.disabled .exam-icon{
+  background:linear-gradient(135deg,rgba(140,150,170,.1),rgba(140,150,170,.03));
+  border-color:rgba(140,150,170,.18);
+}
+
+.exam-name{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:1.2rem;font-weight:700;line-height:1.2;
+}
+.exam-full{font-size:.82rem;color:var(--muted);line-height:1.4;flex:1}
+
+.exam-arrow{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:4px;
+  font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:500;
+  color:#3a7be0;letter-spacing:.03em;
+}
+.badge{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;font-size:.65rem;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  border-radius:999px;padding:3px 9px;
+  background:rgba(140,150,170,.15);color:var(--muted);
+  border:1px solid var(--line);width:fit-content;margin-top:4px;
+}
+
+.exam-card.disabled{opacity:.5;pointer-events:none}
+.exam-card.disabled .exam-arrow{display:none}
+
+.hub-footer{
+  margin-top:44px;font-size:.78rem;color:var(--muted);
+  font-family:'IBM Plex Mono',monospace;text-align:center;opacity:.7;
+}
+</style>
+
+<body>
+  <div class="hub-header">
+    <div class="hub-eyebrow">Paper II · Study Predictor</div>
+    <h1 class="hub-title">Choose Your Exam</h1>
+    <p class="hub-sub">Select an exam to access the predictor and practice</p>
+  </div>
+
+  <div class="hub-grid">
+    <!-- UGC NET — active -->
+    <a class="exam-card" href="./ugc-net/">
+      <div class="exam-icon">📘</div>
+      <div class="exam-name">UGC NET</div>
+      <p class="exam-full">University Grants Commission — National Eligibility Test</p>
+      <span class="exam-arrow">Open <span>→</span></span>
+    </a>
+
+    <!-- CSIR NET — active -->
+    <a class="exam-card" href="./csir-net/">
+      <div class="exam-icon">🔬</div>
+      <div class="exam-name">CSIR NET</div>
+      <p class="exam-full">Council of Scientific & Industrial Research — Mathematics, Life Sciences and more</p>
+      <span class="exam-arrow">Open <span>→</span></span>
+    </a>
+
+    <!-- GATE — active -->
+    <a class="exam-card" href="./gate/">
+      <div class="exam-icon">⚙️</div>
+      <div class="exam-name">GATE</div>
+      <p class="exam-full">Graduate Aptitude Test in Engineering — Psychology (XH-C5), Life Science (XL)</p>
+      <span class="exam-arrow">Open <span>→</span></span>
+    </a>
+
+    <!-- COGJET — active -->
+    <a class="exam-card" href="./cogjet/">
+      <div class="exam-icon">🧩</div>
+      <div class="exam-name">COGJET</div>
+      <p class="exam-full">Cognitive Science Joint Entrance Test — IIT Gandhinagar</p>
+      <span class="exam-arrow">Open <span>→</span></span>
+    </a>
+  </div>
+
+  <div class="hub-footer">Local · LAN only · Data stays on this device</div>
+</body>
+</html>

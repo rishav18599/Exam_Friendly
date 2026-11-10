@@ -1,0 +1,1 @@
+﻿window.PYQ_CONFIG={};
